@@ -1,0 +1,42 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--node Calibrate-->
+<node name="Calibrate"><![CDATA[# Calibration helper for Thymio ground and proximity sensors
+# Use this file to inspect reflected values during simulation.
+
+var left_ground = 0
+var right_ground = 0
+var front_center = 0
+var front_left = 0
+var front_right = 0
+var initialized = 0
+
+onevent prox.ground.reflected[0]
+  if initialized == 0 then
+    timer.period[0] = 200
+    motor.left.target = 0
+    motor.right.target = 0
+    initialized = 1
+  end
+
+onevent timer0
+  left_ground = prox.ground.reflected[0]
+  right_ground = prox.ground.reflected[1]
+  front_center = prox.horizontal[2]
+  front_left = prox.horizontal[1]
+  front_right = prox.horizontal[3]
+
+  leds.circle[0] = left_ground / 4
+  leds.circle[1] = right_ground / 4
+  leds.circle[2] = front_center / 10
+  leds.circle[3] = front_left / 10
+  leds.circle[4] = front_right / 10
+]]></node>
+
+
+</network>

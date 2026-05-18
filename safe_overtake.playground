@@ -1,0 +1,19 @@
+<!DOCTYPE aseba-playground>
+<aseba-playground>
+    <author name="Safe Overtake Project"/>
+
+    <color name="white" r="1.0" g="1.0" b="1.0"/>
+    <color name="black" r="0.0" g="0.0" b="0.0"/>
+
+    <world w="150" h="400" color="white" groundTexture="straight_road.svg" />
+
+    <!-- Vehicle A: slow vehicle in right/original lane -->
+    <robot type="thymio2" x="95" y="95" angle="1.57" port="33334" name="Vehicle_A"/>
+
+    <!-- Vehicle B: faster vehicle behind A -->
+    <robot type="thymio2" x="90" y="20" angle="1.57" port="33333" name="Vehicle_B"/>
+
+    <!-- Vehicle C: opposite-direction vehicle in left/opposite lane -->
+    <robot type="thymio2" x="55" y="295" angle="-1.57" port="33335" name="Vehicle_C"/>
+
+</aseba-playground>

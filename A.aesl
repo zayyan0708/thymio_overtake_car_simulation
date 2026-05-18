@@ -1,0 +1,110 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--node Vehicle_A on DESKTOP-6O5BA9D - 24872-->
+<node name="Vehicle_A on DESKTOP-6O5BA9D - 24872" nodeId="{b8a7cc26-78ce-4080-ad80-15802966c1b0}"><![CDATA[#thresholds
+var thresholdLeft  = 75
+var thresholdRight = 77
+
+# settings
+var baseSpeed = 28	
+var gainNumerator = 10      # Conservative gain for smooth line following
+var gainDenominator = 100   # Denominator for proportional control
+var stopDistance = 3000
+var deadZone = 4            # Dead zone for smooth line following
+
+# global
+var leftValue = 0
+var rightValue = 0
+var error = 0
+var correction = 0
+var frontSensorsAvg = 0
+
+#boolean logic
+var hasDetectedWall=0
+
+
+onevent prox
+    callsub followLine
+
+sub followLine
+    callsub checkWall
+    if hasDetectedWall == 0 then
+        callsub clearLeds
+
+        # Read the current ground sensor values
+        leftValue = prox.ground.delta[0]
+        rightValue = prox.ground.delta[1]
+
+        # Calculate the error: how far each sensor is from its threshold (ideal line value)
+        # If error is positive, robot is too far right; if negative, too far left
+        error = (leftValue - thresholdLeft) - (rightValue - thresholdRight)
+
+        # Apply proportional control to compute the correction
+        correction = (error * gainNumerator) / gainDenominator
+
+        # Optional: Dead zone
+        if correction > -deadZone and correction < deadZone then
+            correction = 0
+        end
+
+        # Adjust motor speeds to steer the robot back to the line
+        motor.left.target = baseSpeed - correction
+        motor.right.target = baseSpeed + correction
+    else
+        # If a wall is detected, stop and blink
+        callsub brakeBlinker
+        motor.left.target = 0
+        motor.right.target = 0
+    end
+
+sub checkWall
+    # get average of all sensor since its wall we will get avg because all front sensor got hit
+    frontSensorsAvg = (prox.horizontal[0] + prox.horizontal[1] + prox.horizontal[2] + prox.horizontal[3] + prox.horizontal[4]) / 5
+    if frontSensorsAvg > stopDistance then
+        # wall detected
+        hasDetectedWall = 1
+    else
+        # no wall
+        hasDetectedWall = 0
+    end
+	
+onevent buttons
+    if button.left == 1 then
+        callsub leftBlinker
+        motor.left.target = 0
+        motor.right.target = 100
+    elseif button.right == 1 then
+        callsub rightBlinker
+        motor.left.target = 100
+        motor.right.target = 0
+    elseif button.center == 1 then
+        callsub clearLeds
+        motor.left.target = 0
+        motor.right.target = 0
+    end
+
+
+sub clearLeds
+    # top RGB off
+    call leds.top(0, 0, 0)
+    call leds.circle(0, 0, 0, 0, 0, 0, 0, 0)
+
+sub leftBlinker
+    callsub clearLeds
+    call leds.circle(0, 0, 0, 0, 0, 0, 32, 0)
+
+sub rightBlinker
+    callsub clearLeds
+    call leds.circle(0, 0, 32, 0, 0, 0, 0, 0)
+
+sub brakeBlinker
+    callsub clearLeds
+    call leds.top(32, 0, 0) ]]></node>
+
+
+</network>
